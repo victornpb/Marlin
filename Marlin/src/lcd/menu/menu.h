@@ -79,7 +79,7 @@ class MenuItemBase {
 
     // Draw an item either selected ('>') or not (space) with post_char
     FORCE_INLINE static void _draw(const bool sel, const uint8_t row, PGM_P const pstr, const char post_char) {
-      _draw(sel, row, pstr, '>', post_char);
+      _draw(sel, row, pstr, LCD_STR_SELECT_CHAR, post_char);
     }
 };
 
@@ -93,7 +93,7 @@ class MenuItem_static : public MenuItemBase {
 class MenuItem_confirm : public MenuItemBase {
   public:
     FORCE_INLINE static void draw(const bool sel, const uint8_t row, PGM_P const pstr, ...) {
-      _draw(sel, row, pstr, '>', LCD_STR_ARROW_RIGHT[0]);
+      _draw(sel, row, pstr, LCD_STR_SELECT_CHAR, LCD_STR_ARROW_RIGHT[0]);
     }
     // Implemented for HD44780 and DOGM
     // Draw the prompt, buttons, and state
@@ -139,7 +139,7 @@ class MenuItem_back : public MenuItemBase {
 class MenuItem_submenu : public MenuItemBase {
   public:
     FORCE_INLINE static void draw(const bool sel, const uint8_t row, PGM_P const pstr, ...) {
-      _draw(sel, row, pstr, '>', LCD_STR_ARROW_RIGHT[0]);
+      _draw(sel, row, pstr, LCD_STR_SELECT_CHAR, LCD_STR_ARROW_RIGHT[0]);
     }
     static inline void action(PGM_P const, const screenFunc_t func) { ui.save_previous_screen(); ui.goto_screen(func); }
 };
@@ -149,7 +149,7 @@ class MenuItem_button : public MenuItemBase {
   public:
     // Button-y Items are selectable lines with no other indicator
     static inline void draw(const bool sel, const uint8_t row, PGM_P const pstr, ...) {
-      _draw(sel, row, pstr, '>', ' ');
+      _draw(sel, row, pstr, LCD_STR_SELECT_CHAR, ' ');
     }
 };
 
@@ -157,7 +157,7 @@ class MenuItem_button : public MenuItemBase {
 class MenuItem_gcode : public MenuItem_button {
   public:
     FORCE_INLINE static void draw(const bool sel, const uint8_t row, PGM_P const pstr, ...) {
-      _draw(sel, row, pstr, '>', ' ');
+      _draw(sel, row, pstr, LCD_STR_SELECT_CHAR, ' ');
     }
     static void action(PGM_P const, const char * const pgcode);
     static inline void action(PGM_P const pstr, const uint8_t, const char * const pgcode) { action(pstr, pgcode); }

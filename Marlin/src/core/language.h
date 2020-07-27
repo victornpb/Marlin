@@ -310,9 +310,13 @@
   #define LCD_STR_UPLEVEL     "\x03"
   #define LCD_STR_REFRESH     "\x04"
   #define LCD_STR_FOLDER      "\x05"
-  #define LCD_STR_FEEDRATE    "\x06"
-  #define LCD_STR_CLOCK       "\x07"
-  #define LCD_STR_ARROW_RIGHT ">"  /* from the default character set */
+  #define LCD_STR_FEEDRATE    "F" //"\x10111011" //>>
+  #define LCD_STR_CLOCK       "\x06"
+  #define LCD_STR_SD          "\x07"
+
+  // #define LCD_STR_ARROW_RIGHT "\x7E"// \x01111110"  /* from the default character set */
+  #define LCD_STR_ARROW_RIGHT ">"
+  #define LCD_STR_SELECT_CHAR '\x7E'
 
 #else
   //

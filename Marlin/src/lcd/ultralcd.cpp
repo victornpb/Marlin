@@ -375,6 +375,18 @@ bool MarlinUI::get_blink() {
   return blink != 0;
 }
 
+bool MarlinUI::get_cycle_screen() {
+  static uint8_t cycle = 0;
+  static millis_t next_cycle_ms = 0;
+  millis_t ms = millis();
+  if (ELAPSED(ms, next_cycle_ms)) {
+    cycle ^= 0xFF;
+    next_cycle_ms = ms + 3000 - (LCD_UPDATE_INTERVAL) / 2;
+  }
+  return cycle != 0;
+}
+
+
 ////////////////////////////////////////////
 ///////////// Keypad Handling //////////////
 ////////////////////////////////////////////

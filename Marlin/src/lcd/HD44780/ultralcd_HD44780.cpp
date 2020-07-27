@@ -166,11 +166,11 @@ void MarlinUI::set_custom_characters(const HD44780CharSet screen_charset/*=CHARS
   // CHARSET_INFO
   const static PROGMEM byte bedTemp[8] = {
     B00000,
-    B11111,
     B10101,
-    B10001,
+    B01010,
     B10101,
-    B11111,
+    B01010,
+    B10101,
     B00000,
     B00000
   };
@@ -187,14 +187,14 @@ void MarlinUI::set_custom_characters(const HD44780CharSet screen_charset/*=CHARS
   };
 
   const static PROGMEM byte thermometer[8] = {
+    B11111,
+    B01110,
+    B11111,
+    B11111,
+    B01110,
     B00100,
-    B01010,
-    B01010,
-    B01010,
-    B01010,
-    B10001,
-    B10001,
-    B01110
+    B00000,
+    B00000
   };
 
   const static PROGMEM byte uplevel[8] = {
@@ -208,6 +208,18 @@ void MarlinUI::set_custom_characters(const HD44780CharSet screen_charset/*=CHARS
     B00000
   };
 
+  const static PROGMEM byte cursor[8] = {
+    B11000,
+    B11100,
+    B11110,
+    B11111,
+    B11111,
+    B11110,
+    B11100,
+    B11000
+  };
+
+
   const static PROGMEM byte feedrate[8] = {
     #if LCD_INFO_SCREEN_STYLE == 1
       B00000,
@@ -219,13 +231,13 @@ void MarlinUI::set_custom_characters(const HD44780CharSet screen_charset/*=CHARS
       B00000,
       B00000
     #else
-      B11100,
-      B10000,
-      B11000,
-      B10111,
-      B00101,
-      B00110,
-      B00101,
+      B00000,
+      B00100,
+      B10010,
+      B01001,
+      B10010,
+      B00100,
+      B00000,
       B00000
     #endif
   };
@@ -298,6 +310,16 @@ void MarlinUI::set_custom_characters(const HD44780CharSet screen_charset/*=CHARS
       B00000,
       B00000
     };
+    const static PROGMEM byte sdicon[8] = {
+      B00000,
+      B11100,
+      B10010,
+      B10001,
+      B10001,
+      B10001,
+      B11111,
+      B00000
+    };
 
   #endif // SDSUPPORT
 
@@ -314,7 +336,8 @@ void MarlinUI::set_custom_characters(const HD44780CharSet screen_charset/*=CHARS
       createChar_P(LCD_STR_DEGREE[0], degree);
       createChar_P(LCD_STR_THERMOMETER[0], thermometer);
       createChar_P(LCD_STR_FEEDRATE[0], feedrate);
-      createChar_P(LCD_STR_CLOCK[0], clock);
+      // createChar_P(LCD_STR_CLOCK[0], clock);
+      createChar_P(LCD_STR_SD[0], sdicon);
 
       #if ENABLED(LCD_PROGRESS_BAR)
         if (screen_charset == CHARSET_INFO) { // 3 Progress bar characters for info screen
@@ -574,18 +597,20 @@ FORCE_INLINE void _draw_bed_status(const bool blink) {
 
   FORCE_INLINE void _draw_print_progress() {
     const uint8_t progress = ui.get_progress_percent();
-    lcd_put_u8str_P(PSTR(
+    
+    
       #if ENABLED(SDSUPPORT)
-        "SD"
+        lcd_put_wchar(LCD_STR_SD[0]);
       #elif ENABLED(LCD_SET_PROGRESS_MANUALLY)
-        "P:"
+        lcd_put_u8str_P(PSTR("P"));
       #endif
-    ));
-    if (progress)
+    
+    if (progress){
       lcd_put_u8str(ui8tostr3rj(progress));
+      lcd_put_wchar('%');
+    }
     else
-      lcd_put_u8str_P(PSTR("---"));
-    lcd_put_wchar('%');
+      lcd_put_u8str_P(PSTR("____"));
   }
 
 #endif
@@ -729,9 +754,10 @@ void MarlinUI::draw_status_message(const bool blink) {
 void MarlinUI::draw_status_screen() {
 
   const bool blink = get_blink();
+  const bool cycle = get_cycle_screen();
   lcd_moveto(0, 0);
 
-  #if LCD_INFO_SCREEN_STYLE == 0
+#if LCD_INFO_SCREEN_STYLE == 0
 
     // ========== Line 1 ==========
 
@@ -973,7 +999,95 @@ void MarlinUI::draw_status_screen() {
       lcd_put_u8str(buffer);
     #endif
 
-  #endif // LCD_INFO_SCREEN_STYLE 1
+  #elif LCD_INFO_SCREEN_STYLE == 2
+
+
+  /*
+
+      |F100%  S100% X100.00|
+      |B000/000°    Y100.00|
+      |T000/000°    Z00.000|
+      |01234567890123456789|
+
+      |F100% T--:-- X100.00|
+      |B000/000°    Y100.00|
+      |T000/000°    Z00.000|
+      |01234567890123456789|
+
+  */
+
+    // ========== COL 1 ==========
+
+    // line 1
+
+    // Feedrate
+    lcd_put_wchar(LCD_STR_FEEDRATE[0]);
+    lcd_put_u8str(i16tostr3rj(feedrate_percentage));
+    lcd_put_wchar('%');
+    lcd_put_wchar(' ');
+    lcd_put_wchar(' ');
+
+    if(cycle){
+      // Elapsed Time or SD Percent
+      #if HAS_PRINT_PROGRESS
+        _draw_print_progress();
+        lcd_put_wchar(' ');
+      #else
+        duration_t elapsed = print_job_timer.duration();
+        char buffer[14];
+        (void)elapsed.toDigital(buffer);
+        // lcd_put_wchar(LCD_STR_CLOCK[0]);
+        lcd_put_u8str(buffer);
+      #endif
+    }
+    else {
+      duration_t elapsed = print_job_timer.duration();
+      char buffer[14];
+      (void)elapsed.toDigital(buffer);
+      // lcd_put_wchar(LCD_STR_CLOCK[0]);
+      lcd_put_u8str(buffer);
+    }
+
+    
+
+    // line 2
+    lcd_moveto(0, 1);
+    #if HOTENDS < 2
+     _draw_heater_status(H_E0, LCD_STR_THERMOMETER[0], blink);
+    #else
+      if (blink) {
+        _draw_heater_status(H_E2, LCD_STR_THERMOMETER[0], blink); //Hotend 2
+      }
+      else {
+        _draw_heater_status(H_E0, LCD_STR_THERMOMETER[0], blink);
+      }
+    #endif
+
+    // line 3
+    lcd_moveto(0, 2);
+    #if HAS_HEATED_BED
+      _draw_bed_status(blink); // Bed on line 2 or 3
+    #endif
+
+
+    // ======= Col 2 ========
+    // X
+    // Y
+    // Z
+       
+    const xy_pos_t lpos = current_position.asLogical();
+    lcd_moveto(LCD_WIDTH - 7, 0);
+    _draw_axis_value(X_AXIS, ftostr42_52(lpos.x), blink);
+    lcd_moveto(LCD_WIDTH - 7, 1);
+    _draw_axis_value(Y_AXIS, ftostr42_52(lpos.y), blink);
+    lcd_moveto(LCD_WIDTH - 7, 2);
+    _draw_axis_value(Z_AXIS, ftostr42_52(LOGICAL_Z_POSITION(current_position.z)), blink);
+
+    #if HAS_LEVELING && (HOTENDS > 1 || !HAS_HEATED_BED)
+      lcd_put_wchar(LCD_WIDTH - 1, 0, planner.leveling_active || blink ? '_' : ' ');
+    #endif
+
+  #endif // LCD_INFO_SCREEN_STYLE 2
 
   // ========= Last Line ========
 
