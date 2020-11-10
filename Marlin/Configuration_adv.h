@@ -992,7 +992,7 @@
 #endif // HAS_LCD_MENU
 
 // Scroll a longer status message into view
-//#define STATUS_MESSAGE_SCROLLING
+#define STATUS_MESSAGE_SCROLLING
 
 // On the Info Screen, display XY with one decimal place when possible
 //#define LCD_DECIMAL_SMALL_XY
@@ -1122,7 +1122,7 @@
   //#define LONG_FILENAME_HOST_SUPPORT
 
   // Enable this option to scroll long filenames in the SD card menu
-  //#define SCROLL_LONG_FILENAMES
+  #define SCROLL_LONG_FILENAMES
 
   // Leave the heaters on after Stop Print (not recommended!)
   //#define SD_ABORT_NO_COOLDOWN
@@ -1144,7 +1144,7 @@
   /**
    * Auto-report SdCard status with M27 S<seconds>
    */
-  //#define AUTO_REPORT_SD_STATUS
+  #define AUTO_REPORT_SD_STATUS
 
   /**
    * Support for USB thumb drives using an Arduino USB Host Shield or
@@ -2852,20 +2852,21 @@
   #define USER_SCRIPT_AUDIBLE_FEEDBACK
   #define USER_SCRIPT_RETURN  // Return to status screen after a script
 
-  //#define USER_DESC_1 "Home & UBL Info"
-  //#define USER_GCODE_1 "G28\nG29 W"
+  #define USER_DESC_1 "Home, Level, Park"
+  #define USER_GCODE_1 "G28\nG29\nG27"
 
   #define USER_DESC_2 "Park (G27)"
   #define USER_GCODE_2 "G27"
 
-  #define USER_DESC_3 "Clean Tip (Pos)"
-  #define USER_GCODE_3 "G1 X" STRINGIFY(X_MIN_POS) " Y" STRINGIFY(Y_MIN_POS) " Z" STRINGIFY(Z_MIN_POS+5.0)
+  #define X_MIDDLE_POS (X_MAX_POS/2)
+  #define USER_DESC_3 "Park: Heating pos"
+  #define USER_GCODE_3 "G1 X" STRINGIFY(X_MIDDLE_POS) " Y" STRINGIFY(Y_MAX_POS) " Z50"
 
-  //#define USER_DESC_4 "Heat Bed/Home/Level"
-  //#define USER_GCODE_4 "M140 S" STRINGIFY(PREHEAT_2_TEMP_BED) "\nG28\nG29"
+  #define USER_DESC_4 "Park: Nozzle Access"
+  #define USER_GCODE_4 "G1 X" STRINGIFY(X_MAX_POS) " Y" STRINGIFY(Y_MIN_POS) " Z100"
 
-  //#define USER_DESC_5 "Home & Info"
-  //#define USER_GCODE_5 "G28\nM503"
+  #define USER_DESC_5 "Home & Info"
+  #define USER_GCODE_5 "G28\nM503"
 #endif
 
 /**
