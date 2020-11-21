@@ -407,6 +407,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 29: M29(); break;                                    // M29: Stop SD write
         case 30: M30(); break;                                    // M30 <filename> Delete File
         case 32: M32(); break;                                    // M32: Select file and start SD print
+        case 35: M35(); break;                                    // M32: Select file and start SD print
 
         #if ENABLED(LONG_FILENAME_HOST_SUPPORT)
           case 33: M33(); break;                                  // M33: Get the long full path to a file or folder

@@ -558,6 +558,49 @@ void CardReader::openFileWrite(char * const path) {
 }
 
 //
+// Open a file by DOS path for read
+//
+void CardReader::openFileRead_(char * const path) {
+  if (!isMounted()) return;
+
+  announceOpen(2, path);
+  file_subcall_ctr = 0;
+
+  endFilePrint();
+
+  SdFile *curDir;
+  const char * const fname = diveToFile(false, curDir, path);
+  if (!fname) return;
+
+  if (file.open(curDir, fname, O_READ)) {
+    flag.saving = false;
+    selectFileByName(fname);
+    #if ENABLED(EMERGENCY_PARSER)
+      emergency_parser.disable();
+    #endif
+
+    char buf[32];
+    uint8_t i;
+    for (i=0; i<32; i++){
+      byte b = file.read();
+      if (b == -1) {
+        buf[i] = '\0';
+        break;
+      }
+      buf[i] = b;
+    }
+
+    SERIAL_CHAR('>');
+    SERIAL_ECHO(i);
+    SERIAL_CHAR(' ');
+    SERIAL_ECHOLNPAIR(buf);
+
+  }
+  else
+    openFailed(fname);
+}
+
+//
 // Delete a file by name in the working directory
 //
 void CardReader::removeFile(const char * const name) {

@@ -88,6 +88,8 @@ public:
   static void closefile(const bool store_location=false);
   static void removeFile(const char * const name);
 
+  static void openFileRead_(char * const path);   // Used by M35
+
   static inline char* longest_filename() { return longFilename[0] ? longFilename : filename; }
   #if ENABLED(LONG_FILENAME_HOST_SUPPORT)
     static void printLongPath(char * const path);   // Used by M33
